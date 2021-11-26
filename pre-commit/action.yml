@@ -8,6 +8,14 @@ inputs:
     description: Version of terraform-docs to use when evaluating checks
     required: false
     default: v0.16.0
+  terraform-tflint-version:
+    description: Version of terraform-tflint to use when evaluating checks
+    required: false
+    default: v0.33.1
+  terraform-tfsect-version:
+    description: Version of terraform-tfsec to use when evaluating checks
+    required: false
+    default: v0.60.1
   args:
     description: Arguments to pass to pre-commit
     required: false
@@ -26,8 +34,13 @@ runs:
       shell: bash
       run: |
         pip install -q pre-commit
-        curl -sLo ./terraform-docs.tar.gz https://github.com/terraform-docs/terraform-docs/releases/download/${{ inputs.terraform-docs-version }}/terraform-docs-${{ inputs.terraform-docs-version }}-$(uname)-amd64.tar.gz && tar -xzf terraform-docs.tar.gz terraform-docs && chmod +x terraform-docs && sudo mv terraform-docs /usr/bin/
-        curl -sL "$(curl -s https://api.github.com/repos/terraform-linters/tflint/releases/latest | grep -o -E "https://.+?_linux_amd64.zip")" > tflint.zip && unzip -qq tflint.zip && rm tflint.zip 2> /dev/null && sudo mv tflint /usr/bin/
+        curl -sLo ./terraform-docs.tar.gz https://github.com/terraform-docs/terraform-docs/releases/download/${{ inputs.terraform-docs-version }}/terraform-docs-${{ inputs.terraform-docs-version }}-Linux-amd64.tar.gz && tar -xzf terraform-docs.tar.gz terraform-docs && chmod +x terraform-docs && sudo mv terraform-docs /usr/bin/
+        curl -sLo ./terraform-tflint.zip https://github.com/terraform-linters/tflint/releases/download/${{ inputs.terraform-tflint-version }}/tflint_linux_amd64.zip && unzip -qq terraform-tflint.zip && chmod +x tflint && sudo mv tflint /usr/bin/
+        curl -sLo ./tfsec https://github.com/tfsec/tfsec/releases/download/${{ inputs.terraform-tfsect-version }}/tfsec-linux-amd64 && chmod +x tfsec && sudo mv tfsec /usr/bin/
+
+    - name: Execute tflint init
+      shell: bash
+      run: tflint --init
 
     - name: Execute pre-commit
       shell: bash
